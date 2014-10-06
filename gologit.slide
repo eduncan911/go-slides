@@ -1,0 +1,216 @@
+The Art of Application Logging
+The Good, the Bad and the Ugly
+3 Oct 2014
+
+Eric Duncan
+SinglePlatform
+twitter: @eduncan911
+
+* Logging: What is Logging?
+
+* Logging: What is Logging?
+
+"In computer log management and intelligence, logging is an art and science seeking to make sense out of computer-generated records."
+
+~Wikipedia: Log analysis
+
+* Logging: Tuco's Point of View
+
+.image gologit/Tuco.jpg
+
+* Logging: What is Logging?
+
+I define logging as: 
+
+"The art of capturing an application or feature's flow of logic, from start to finish."
+
+Only the domain expert(s) can write the log entries.
+
+* Logging: Logic
+
+* Logging: Logic
+
+What happens when you don't plan out your logging?
+
+.image gologit/logicfail.gif
+
+* Logging: Logic
+
+The Basics of Logging
+
+- Think about _How_ that log message will be used.
+- Always consider the _Context_ surrounding the message.
+- _Automate_ the global context and stack info.
+- You can never log too much.*
+
+But before you get good at it, you got to experience the pain of debugging log statements yourself.
+
+* Logging: Logic
+
+Well, you _can_ log too much.  Don't log sensitive information.
+
+- Exclude Passwords from global HTTP Request captures
+- Exclude Credit Card numbers from the same
+- Spend a little time to write "Search and Destroy" filters
+
+Basic rule: If it puts into question rather it is DSS PCI compliant, don't log it in the context.  
+
+Sensitive items being logged is a hackers dream.
+
+* Logging: Logic
+
+When is logging used?
+
+Logging is only looked at when there is a problem.  But, don't confuse _logging_ with _error_ _handling_.
+
+- _Error_ _handling_ is the act of responding to and resolving that error.  E.g., displaying a Status 500 to the user.
+- _Logging_ is used when something has gone wrong and the reason is unclear.  E.g. you need to debug the application.
+
+http://stackoverflow.com/questions/3658527/where-what-level-should-logging-code-go
+
+* Centralized Logging: Use a common format!
+
+* Centralized Logging: Use a common format!
+
+"To aggregate logging to a central repository (e.g. LogStash), a common format of log entries should be defined by the group and strictly followed."
+
+Why?
+
+- Log level filtering
+- User context grouping across systems
+- Common Alerts matching (instead of 100s of patterns)
+- Ease logging management tasks (e.g. Ops)
+- To ease someone else debugging _YOUR_ code!
+
+And I am sure a lot more than I could think of here on the 4/5 Subway.
+
+* Centralized Logging: Use a common format!
+
+A few real examples of a commonly formatted entries:
+
+    // TasksService03 scheduled
+    Level: WARN, DateTime: 2014-01-01 16:00:01.6756 (UTC), ThreadId: 8ef4ae2f15144a94a4e45535c39f7e12, Machine: KBDBS-07, ProcessId: 32268 Message: TwilioSmsProvider.UpdateSmsStatuses(): SmsQueueId '300' wasn't found in Twilio log. Twilio SID 'SMf5e7c6c4f3083ac40a18d40ad4e59183'.GlobalContext: |appInstanceId=9a0e678dba46440bb5342f195eba5940|ThreadContext: |iterationId=fe8e99550f444c8cacb87b8c0c5d4232||jobName=Daily: UpdateSmsStatusTask at 16:0 UTC||taskName=UpdateSmsStatusTask|StackTrace: TaskWrapper.Quartz.IJob.Execute => UpdateSmsStatusTask.Execute => TwilioSmsProvider.UpdateSmsStatuses
+    
+    // SecureWeb17's background-check
+    Level: INFO, DateTime: 2014-01-01 15:04:56.5244 (UTC), ThreadId: fbcb841c2d6e45af9164baf3f6314d64, Machine: KBSECURE-17, ProcessId: 23648 Message: Overview() for 'msteestyle79': Loading salutation...StackTrace: ReflectedActionDescriptor.Execute => <no type>.lambda_method => AccountController.Overview URL: GET secure.kiboo.com:443/Username: msteestyle71QUERY_STRING: HTTP_ACCEPT_LANGUAGE: en-USHTTP_USER_AGENT: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like GeckoREMOTE_ADDR: 68.105.234.202/ip68-105-234-202.hr.hr.cox.netREMOTE_PORT: 53102HTTP_COOKIE: __utmc=82579724kiboo-ping-tracker=count%3D5%26expireDatetime%3D1388538830250%26timer%3D1447GAVisitorTracking=XXXXXX__utma=82579724.1889277427.1377023706.1388537692.1388588641.174__utmz=82579724.1388588641.174.114.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided)__utmx=82579724.lKVQc_l5TW-FP95TxM9j-Q$36539438-4:1__utmxx=82579724.lKVQc_l5TW-FP95TxM9j-Q$36539438-4:1384366215:15552000__utmb=82579724.6.10.1388588641CONTENTBOXFILTERS=Expires=1/1/2014 3:05:56 PM +00:00&UserTargets=6&BudgetTargets=0&GoalTargets=1HTTP_REFERER: https://my.kiboo.com/authentication/updatingaccount
+    
+    // Web05 post request
+    Level: FATAL, DateTime: 2014-01-05 18:15:38.2628 (UTC), ThreadId: 0fe8c44478494f74a0290b3a2cf161f6, Machine: KBWEB-02, ProcessId: 34636 Message: =================================================================================================================================================================================GetCardProxyByCardNumberResponse: has returned errors in it's service invocation:**Error Number: '-2147220453'**Response error description: 'No rows were returned for your given search criteria.'**Request Url: https://(blanked).com/a2a/CO_GetProxyValue.asp?proxyvalue=xxxxxxxxxxxxxxxxx&userid=xxxxxx&pwd=xxxxxxxxxxxxx&sourceid=xxx&clientid=360851&hdr=1&resp=XML**RawRootResponse: <r:ROOT Response="0" ErrorNumber="-2147220453" ErrorDescription="No rows were returned for your given search criteria." ErrorDisplay="1" xmlns:r="#SchemaA2A"></r:ROOT>=================================================================================================================================================================================StackTrace: FISCardProvider.ActivateCardAtProvider => CardClient.GetCardProxyByCardNumber => ResponseBase`2.SuccessOrThrow URL: POST my.kiboo.com:443/activateUsername: pennykoo7QUERY_STRING: HTTP_ACCEPT_LANGUAGE: en-US,en;q=0.8HTTP_USER_AGENT: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.27 (KHTML, like Gecko) Chrome/26.0.1386.0 Safari/537.27REMOTE_ADDR: 173.61.152.65/pool-173-61-152-65.cmdnnj.fios.verizon.netREMOTE_PORT: 55616HTTP_COOKIE: GAVisitorTracking=c30de2d7e39f400aacdbcf678ec9ddd0kiboo-ping-tracker=count%3D2%26expireDatetime%3D1388945823984%26timer%3D17__utma=82579724.1626973110.1388945217.1388945217.1388945217.1__utmb=82579724.26.9.1388945737142__utmc=82579724__utmz=82579724.1388945217.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)CONTENTBOXFILTERS=Expires=1/5/2014 6:16:37 PM +00:00&UserTargets=6&BudgetTargets=0&GoalTargets=1HTTP_REFERER: https://my.kiboo.com/activate
+
+* Centralized Logging: Use a common format!
+
+Suggestions for common formats:
+
+    Level: {% level %}, DateTime: {% datetime %}, 
+    Machine: {% machineId %}, ProcessId: {% procid %},
+    Message: {% message %}
+    
+    DateTime: {% datetime %}, Level: {% level %}, ThreadId: {% GoRoutine %},
+    RequestId: {% guid.Parse(...) %} , Machine: {% machineId %}, ProcessId: {% procid %}
+    Message: {% message %}
+
+Use line breaks!!
+
+Most of this is considered "Global Context" logging, outside of your actual Message.
+
+* Centralized Logging: Use a common format!
+
+When coming up with a format, always try to include:
+
+- Level of Logging
+- A specific DateTime format:  YYYY-MM-DD HH:mm:ss.ms (TMZ)
+- ProcessId (really helps linking with Ops' logs)
+- Machine Name (again, helps link it with Ops' logs)
+
+And if applicable, include:
+
+- ThreadId UUID (if your process supports threads)
+- HTTP RequestId UUID (a uuid for the lifespan of that request)
+- HTTP Headers DUMP*
+- HTTP POST DUMP*
+
+*Remember to filter out sensitive data.
+
+* Coding Exercise
+
+* Coding Exercise
+
+Your typical code to debug.
+
+	func (s *Superman) Xray(person string) *XrayVision {
+
+		if !s.EyesOpened {
+			s.OpenEyes()
+		}
+
+		xv, err := s.beginXrayOn(person)
+		if err != nil {
+			os.Exit(1)
+		}
+
+		return xv
+	}
+
+
+* Coding Exercise, Continued ...
+
+We need that log that error, right?
+
+	func (s *Superman) Xray(person string) *XrayVision {
+
+		if !s.EyesOpened {
+			s.OpenEyes()
+		}
+
+		xv, err := s.beginXrayOn(person)
+		if err != nil {
+			Log.Fatal("beginXrayOn() returned a fatal error")
+			os.Exit(1)
+		}
+
+		return xv
+	}
+
+* Coding Exercise, Continued ...
+
+Build the stack track, via logging.
+
+	func (s *Superman) Xray(person string) *XrayVision {
+		Log.Info("Xray() starting.")
+
+		if !s.EyesOpened {
+			Log.Info("Opening eyes")
+			s.OpenEyes()
+			Log.Debug("Eyes were opened")
+		}
+
+		xv, err := s.beginXrayOn(person)
+		if err != nil {
+			Log.Fatal("beginXrayOn() returned a fatal error")
+			os.Exit(1)
+		}
+
+		Log.Debug("Xray() completed.")
+		return xv
+	}
+
+* Coding Exercise, Continued ...
+
+Make sure you log the context, and for all levels.
+
+.play gologit/example.go /START/,/STOP/
+
+* Demo: LogEntries
+
+* Final Thoughts
+
+* Final Thoughts
+
+Remember: Think about the context; and, what lead you to where you are now.
+
+.image gologit/Clint-Eastwood-Good-Bad-Ugly_610.jpg
+
+
+
+
+
