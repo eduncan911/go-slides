@@ -1,0 +1,41 @@
+GoLang Present
+aka Go Slides
+10 Jul 2015
+
+Eric Duncan
+me@eduncan911.com
+twitter: @eduncan911
+
+* GoLang Present
+
+* GoLang Present
+
+My view: an informal presenter tool created by Andrew...
+
+* GoLang Present: History
+
+
+
+- Quick 
+
+* GoLang Present: Installing
+
+
+
+	go get -u -v golang.org/x/tools/cmd/present
+
+* GoLang Present: Usage
+
+Markdown-like syntax
+
+- 
+
+Learn by Example
+
+- http://talks.golang.org/
+
+* GoLang Present: Usage
+
+
+
+* GoLang Present: 
